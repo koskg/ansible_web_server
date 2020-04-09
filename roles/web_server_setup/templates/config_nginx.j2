@@ -1,0 +1,131 @@
+server {
+        listen 80;
+        listen [::]:80;
+        server_name {{domain}} www.{{domain}} {{ansible_enp0s3.ipv4.address}};
+        root /var/www/html/;
+        index index.php;
+#        return 301 https://{{domain}};
+
+	location / {
+		fastcgi_read_timeout 300;
+		fastcgi_param SCRIPT_FILENAME $document_root/$fastcgi_script_name;
+		include fastcgi.conf;
+		if ($request_filename ~ (/|\.php|\.htm|sitemap\.xml|\.feed|robots\.txt|\.raw|/[^.]*)$){
+			rewrite ^(.*)$ /index.php last;
+		}
+	}
+
+	location ~ /ow_cron/run\.php {
+		include fastcgi.conf;
+		fastcgi_read_timeout 300;
+		fastcgi_pass unix:/run/php/php{{php_version}}-fpm.sock;
+	}
+
+	location ~ /ow_updates/index\.php {
+		include fastcgi.conf;
+		fastcgi_read_timeout 300;
+		fastcgi_pass unix:/run/php/php{{php_version}}-fpm.sock;
+	}
+
+	location /index\.php {
+		include fastcgi.conf;
+		fastcgi_read_timeout 300;
+		fastcgi_pass  unix:/run/php/php{{php_version}}-fpm.sock;
+	}
+
+	location ~ ^/index\.php$ {
+		include fastcgi.conf;
+		fastcgi_read_timeout 300;
+		fastcgi_pass  unix:/run/php/php{{php_version}}-fpm.sock;
+	}
+
+	location /ow_updates/ {
+		include fastcgi.conf;
+		fastcgi_read_timeout 300;
+		fastcgi_pass unix:/run/php/php{{php_version}}-fpm.sock;
+	}
+
+    location /phpmyadmin {
+        root /usr/share/;
+        index index.php index.html index.htm;
+        location ~ ^/phpmyadmin/(.+\.php)$ {
+            try_files $uri =404;
+            fastcgi_pass unix:/run/php/php{{php_version}}-fpm.sock;
+            include fastcgi_params;
+            fastcgi_param SCRIPT_FILENAME $document_root$fastcgi_script_name;
+
+        }
+        location ~* ^/phpmyadmin/(.+\.(jpg|jpeg|gif|css|png|js|ico|html|xml|txt))$ {
+            root /usr/share/;
+        }
+    }
+
+}
+
+server {
+    # SSL configuration
+    #
+    listen 443 ssl http2;
+    listen [::]:443 ssl http2;
+#    ssl on;
+#    ssl_certificate /etc/nginx/ssl/path_to.crt;
+#    ssl_certificate_key /etc/nginx/ssl/path_to.key;
+    root /var/www/html;
+    index index.php;
+    server_name www.{{domain}} {{domain}};
+
+ location / {
+
+#    try_files     $uri $uri/ =404;
+    fastcgi_read_timeout 300;
+    fastcgi_param SCRIPT_FILENAME $document_root/$fastcgi_script_name;
+    include fastcgi.conf;
+        if ($request_filename ~ (/|\.php|\.html|\.htm|\.xml|\.feed|robots\.txt|\.raw|/[^.]*)$){
+        rewrite ^(.*)$ /index.php last;
+    }
+  }
+
+  location ~ /ow_cron/run\.php {
+		include fastcgi.conf;
+		fastcgi_read_timeout 300;
+		fastcgi_pass unix:/run/php/php{{php_version}}-fpm.sock;
+  }
+
+  location ~ /ow_updates/index\.php {
+		include fastcgi.conf;
+		fastcgi_read_timeout 300;
+		fastcgi_pass unix:/run/php/php{{php_version}}-fpm.sock;
+  }
+
+  location /index\.php {
+		include fastcgi.conf;
+		fastcgi_read_timeout 300;
+		fastcgi_pass unix:/run/php/php{{php_version}}-fpm.sock;
+  }
+
+  location ~ ^/index\.php$ {
+		include fastcgi.conf;
+		fastcgi_read_timeout 300;
+		fastcgi_pass unix:/run/php/php{{php_version}}-fpm.sock;
+  }
+
+  location /ow_updates/ {
+		include fastcgi.conf;
+		fastcgi_read_timeout 300;
+		fastcgi_pass unix:/run/php/php{{php_version}}-fpm.sock;
+  }
+
+  location /phpmyadmin {
+        root /usr/share/;
+        index index.php index.html index.htm;
+        location ~ ^/phpmyadmin/(.+\.php)$ {
+            try_files $uri =404;
+			fastcgi_pass unix:/run/php/php{{php_version}}-fpm.sock;
+            include fastcgi_params;
+            fastcgi_param SCRIPT_FILENAME $document_root$fastcgi_script_name;
+        }
+        location ~* ^/phpmyadmin/(.+\.(jpg|jpeg|gif|css|png|js|ico|html|xml|txt))$ {
+            root /usr/share/;
+        }
+    }
+}

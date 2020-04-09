@@ -1,0 +1,26 @@
+---
+# tasks file for web_server_setup
+  - name: Info
+    debug: 
+      msg: 
+      - "System:  {{ansible_lsb.description}}"
+      - "IP:      {{ansible_enp0s3.ipv4.address}}"
+      - "Domain: {{ domain }}"
+
+# - name: apt update
+  # apt:  
+    # update_cache: yes
+     
+ # Install nginx server      
+  - include: nginx.yml
+  
+ # Install PHP      
+  - include: php.yml  
+  
+  - name: Copy phpinfo
+    copy: 
+      src: index.php 
+      dest: /var/www/html/index.php 
+      mode: 0664
+ # ------------      
+ 

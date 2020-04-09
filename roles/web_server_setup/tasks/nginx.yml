@@ -1,0 +1,31 @@
+---
+  - name: Install nginx
+    apt:  
+      name: nginx 
+      state: latest
+  
+  - name: Copy nginx config
+    template: 
+      src: config_nginx.j2 
+      dest: /etc/nginx/sites-available/{{domain}} 
+      mode: 0644
+    notify: Restart nginx
+    
+  - name: Create symlink
+    file:
+      src: /etc/nginx/sites-available/{{domain}}
+      dest: /etc/nginx/sites-enabled/{{domain}}
+      state: link
+    
+  - name: Remove default config
+    file:
+      path: /etc/nginx/sites-enabled/default
+      state: absent    
+    
+  - name: Start nginx
+    service: 
+      name: nginx 
+      state: started
+      enabled: yes    
+    
+    
