@@ -1,0 +1,84 @@
+---
+  - name: Install MySql (MariaDB)
+    apt: 
+      name: 
+      - "mariadb-server"
+      - "mariadb-client"
+
+  - name: Install python-pymysql (for Ansible)
+    apt:
+      name: python-pymysql
+      
+  - name: Start MySql
+    service: 
+      name: mysql 
+      state: started
+      enabled: yes  
+
+  - name: Install phpMyAdmin
+    apt:
+      name: phpmyadmin
+      state: latest
+
+  - name: Deletes anonymous MySQL server user
+    mysql_user: 
+      user: '' 
+      host: localhost
+      state: absent  
+      login_unix_socket: /var/run/mysqld/mysqld.sock 
+    ignore_errors: true      
+  
+  - name: Removes the MySQL test database
+    mysql_db: 
+      login_user: root
+      login_password: ""
+      db: test 
+      login_unix_socket: /var/run/mysqld/mysqld.sock 
+      state: absent
+    ignore_errors: true        
+      
+#=========================================================
+      
+  - name: Generate password for admin    
+    set_fact:
+        mysql_admin_pass: "{{ generate_pass }}"      
+      
+  - name: Admin pass
+    debug: 
+      msg: "{{ mysql_admin_pass }}"
+      
+  - name: Create user admin
+    mysql_user: 
+      name: admin
+      password: "{{ mysql_admin_pass }}"
+      state: present
+      priv: '*.*:ALL,GRANT'
+      login_unix_socket: /var/run/mysqld/mysqld.sock  
+
+#==========================================================     
+
+  - name: Create a new database 
+    mysql_db:
+      name: new_db
+      login_unix_socket: /var/run/mysqld/mysqld.sock 
+      state: present
+      
+  - name: Generate password for user    
+    set_fact:
+        mysql_user_pass: "{{ generate_pass }}"      
+
+  - name: User pass
+    debug: 
+      msg: "{{ mysql_user_pass }}"        
+     
+  - name: Create user db
+    mysql_user:
+      name: user_db
+      password: "{{mysql_user_pass}}"
+      priv: 'new_db.*:ALL,GRANT'
+      login_unix_socket: /var/run/mysqld/mysqld.sock 
+      state: present 
+         
+
+
+    

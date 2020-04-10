@@ -1,9 +1,17 @@
 ---
   - name: Install PHP-FPM
     apt: 
-      name:"php{{ php_version }}-fpm"
-
+      name: php{{ php_version }}-fpm
+      state: latest     
+      
   - name: Install PHP modules
     apt:
       name: "{{ php_modules }}"
     notify: Restart php-fpm
+    
+  - name: Start PHP-FPM
+    service: 
+      name: "php{{ php_version }}-fpm" 
+      state: started
+      enabled: yes  
+    
