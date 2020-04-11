@@ -9,10 +9,6 @@
 #      - python-apt
       - python3-apt
 
-  # - name: Install python-pymysql (for Ansible)
-    # apt:
-      # name: python-pymysql
-      
   - name: Start MySql
     service: 
       name: mysql 
@@ -45,7 +41,7 @@
       
   - name: Generate password for admin    
     set_fact:
-        mysql_admin_pass: "{{ generate_pass }}"      
+      mysql_admin_pass: "{{ generate_pass }}"      
       
   - name: Admin pass
     debug: 

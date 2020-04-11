@@ -15,7 +15,5 @@ php_modules:
    - php{{ php_version }}-zip
    - php{{ php_version }}-json
 
-#mysql_admin_pass: qwe
-
 generate_pass: "{{ lookup('password', '/dev/null length=15 chars=ascii_letters,digits') }}"
    

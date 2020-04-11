@@ -20,6 +20,9 @@
    # Install MySQL (MariaDB)      
   - include: mysql.yml  
   
+  # Install MySQL (MariaDB)      
+  - include: ftp.yml 
+  
   - name: Copy phpinfo
     copy: 
       src: index.php 
