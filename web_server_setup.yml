@@ -3,10 +3,10 @@
   hosts: linux1
   become: yes
 
-  # vars_prompt:
-    # - name: "domain"
-      # prompt: "Enter Domain name"
-      # private: no
+  vars_prompt:
+    - name: "domain"
+      prompt: "Enter Domain name"
+      private: no
   
   roles:
     - { role: web_server_setup, when: ansible_os_family == 'Debian' }

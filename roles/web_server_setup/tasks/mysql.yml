@@ -2,12 +2,16 @@
   - name: Install MySql (MariaDB)
     apt: 
       name: 
-      - "mariadb-server"
-      - "mariadb-client"
+      - mariadb-server
+      - mariadb-client
+#      - python-pymysql
+      - python3-pymysql
+#      - python-apt
+      - python3-apt
 
-  - name: Install python-pymysql (for Ansible)
-    apt:
-      name: python-pymysql
+  # - name: Install python-pymysql (for Ansible)
+    # apt:
+      # name: python-pymysql
       
   - name: Start MySql
     service: 
@@ -57,9 +61,13 @@
 
 #==========================================================     
 
+  - name: Generate user name and db name 
+    set_fact:
+      db_user_name: "{{( domain ) | replace('.', '_')}}"
+
   - name: Create a new database 
     mysql_db:
-      name: new_db
+      name: "{{db_user_name}}"
       login_unix_socket: /var/run/mysqld/mysqld.sock 
       state: present
       
@@ -73,9 +81,9 @@
      
   - name: Create user db
     mysql_user:
-      name: user_db
+      name: "{{db_user_name}}"
       password: "{{mysql_user_pass}}"
-      priv: 'new_db.*:ALL,GRANT'
+      priv: '{{db_user_name}}.*:ALL,GRANT'
       login_unix_socket: /var/run/mysqld/mysqld.sock 
       state: present 
          
