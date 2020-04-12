@@ -31,7 +31,6 @@
       password: "{{ ftp_pass |  password_hash('sha512')}}"
       home: /var/www
       group: www-data
-      shell: "/usr/sbin/nologin"
       
   - name: Permission for /var/www
     file:
