@@ -1,6 +1,6 @@
 ---
 - name: Web Server setup for SkaDate software
-  hosts: linux1
+  hosts: aws_test
   become: yes
 
   vars_prompt:

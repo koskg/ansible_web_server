@@ -1,10 +1,18 @@
 ---
 # tasks file for web_server_setup
+  - name: Get public IP
+    ipify_facts: 
+    register: my_ip
+
+  - name: IP
+    set_fact:
+      server_ip: "{{ my_ip.ansible_facts.ipify_public_ip}}"
+
   - name: Info
     debug: 
       msg: 
       - "System:  {{ansible_lsb.description}}"
-      - "IP:      {{ansible_enp0s3.ipv4.address}}"
+      - "IP:      {{server_ip}}"
       - "Domain: {{ domain }}"
 
   - name: apt update

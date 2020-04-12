@@ -1,5 +1,5 @@
 System:  {{ansible_lsb.description}}
-IP:      {{ansible_enp0s3.ipv4.address}}
+IP:      {{server_ip}}
 Domain: {{ domain }}
 ________________________________________
 SSH
@@ -12,11 +12,11 @@ User: {{db_user_name}}
 Pass: {{ mysql_user_pass }} 
 ________________________________________
 PhpMyAdmin
-http://{{ansible_enp0s3.ipv4.address}}/phpmyadmin/
+http://{{server_ip}}/phpmyadmin/
 User: admin
 Pass: {{ mysql_admin_pass }}
 ________________________________________
 FTP
-HostName: {{ansible_enp0s3.ipv4.address}}
+HostName: {{server_ip}}
 Username: ftpuser
 Password: {{ ftp_pass }}
