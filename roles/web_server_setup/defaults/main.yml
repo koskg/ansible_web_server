@@ -16,4 +16,3 @@ php_modules:
    - php{{ php_version }}-json
 
 generate_pass: "{{ lookup('password', '/dev/null length=15 chars=ascii_letters,digits') }}"
-   

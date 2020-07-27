@@ -1,42 +1,42 @@
 ---
-  - name: Install vsftpd
-    apt: 
-      name: vsftpd
-      state: latest     
-      
-  - name: Copy vsftpd config
-    copy: 
-      src: vsftpd.conf
-      dest: /etc/vsftpd.conf 
-      mode: 0644
-    notify: Restart vsftpd
+- name: Install vsftpd
+  apt:
+    name: vsftpd
+    state: latest
 
-  - name: Start vsftpd
-    service: 
-      name: vsftpd 
-      state: started
-      enabled: yes     
-    
-  - name: Generate password for admin    
-    set_fact:
-      ftp_pass: "{{ generate_pass }}"       
-    
-  - name: ftpuser pass
-    debug: 
-      msg: "{{ ftp_pass }}"    
-    
-  - name: Add users
-    user:
-      name: ftpuser
-      password: "{{ ftp_pass |  password_hash('sha512')}}"
-      home: /var/www
-      group: www-data
-      
-  - name: Permission for /var/www
-    file:
-      dest: /var/www
-      owner: www-data
-      group: www-data
-      recurse: yes
-      mode: u=rwX,g=rwX,o=rX   
-    
+- name: Copy vsftpd config
+  copy:
+    src: vsftpd.conf
+    dest: /etc/vsftpd.conf
+    mode: '0644'
+  notify: Restart vsftpd
+
+- name: Start vsftpd
+  service:
+    name: vsftpd
+    state: started
+    enabled: yes
+
+- name: Generate password for admin
+  set_fact:
+    ftp_pass: "{{ generate_pass }}"
+
+- name: ftpuser pass
+  debug:
+    msg: "{{ ftp_pass }}"
+
+- name: Add ftp users
+  user:
+    name: ftpuser
+    password: "{{ ftp_pass |  password_hash('sha512')}}"
+    home: /var/www
+    group: www-data
+    shell: "/usr/sbin/nologin"
+
+- name: Permission for /var/www
+  file:
+    dest: /var/www
+    owner: www-data
+    group: www-data
+    recurse: yes
+    mode: u=rwX,g=rwX,o=rX

@@ -1,0 +1,65 @@
+---
+    - name: Create a security group
+      ec2_group:
+        name: "{{domain_}}_security_group"
+        description: The webservers security group
+        region: "{{region_aws}}"
+        aws_access_key: "{{ aws_access_key_1 }}"
+        aws_secret_key: "{{ aws_secret_key_1 }}"
+        rules:
+          - proto: tcp
+            from_port: 22
+            to_port: 22
+            cidr_ip: 0.0.0.0/0
+          - proto: tcp
+            from_port: 80
+            to_port: 80
+            cidr_ip: 0.0.0.0/0
+          - proto: tcp
+            from_port: 443
+            to_port: 443
+            cidr_ip: 0.0.0.0/0
+          - proto: tcp
+            from_port: 21
+            to_port: 21
+            cidr_ip: 0.0.0.0/0
+          - proto: tcp
+            from_port: 20
+            to_port: 20
+            cidr_ip: 0.0.0.0/0
+          - proto: tcp
+            from_port: 25
+            to_port: 25
+            cidr_ip: 0.0.0.0/0   
+          - proto: tcp
+            from_port: 53
+            to_port: 53
+            cidr_ip: 0.0.0.0/0     
+          - proto: tcp
+            from_port: 110
+            to_port: 110
+            cidr_ip: 0.0.0.0/0
+          - proto: tcp
+            from_port: 143
+            to_port: 143
+            cidr_ip: 0.0.0.0/0  
+          - proto: tcp
+            from_port: 465
+            to_port: 465
+            cidr_ip: 0.0.0.0/0
+          - proto: tcp
+            from_port: 587
+            to_port: 587
+            cidr_ip: 0.0.0.0/0 
+          - proto: udp
+            from_port: 53
+            to_port: 53
+            cidr_ip: 0.0.0.0/0                    
+          - proto: tcp
+            from_port: 49152 
+            to_port: 65534
+            cidr_ip: 0.0.0.0/0
+        rules_egress:
+          - proto: all
+            cidr_ip: 0.0.0.0/0
+      register: security_group

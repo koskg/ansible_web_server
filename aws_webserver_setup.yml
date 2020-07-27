@@ -1,0 +1,47 @@
+---
+- name: AWS EC2 instance create
+  hosts: localhost
+  gather_facts: False
+
+  vars_prompt:
+     - name: "aws_access_key_1"
+       prompt: "Enter aws_access_key"
+       private: no
+
+     - name: "aws_secret_key_1"
+       prompt: "Enter aws_secret_key"
+       private: no
+
+     - name: "domain"
+       prompt: "Enter Domain name"
+       private: no
+
+  vars:
+    #domain: domain.com 
+    region_aws: eu-central-1
+    instance_type_aws: t2.nano
+    image: ami-0e342d72b12109f91
+    user_aws: ubuntu
+    volume_size_for_instance: 10
+
+
+  roles:
+    - role: aws_server_setup 
+
+- name: Web Server setup for SkaDate software
+  hosts: aws_new_server
+  become: yes
+
+  # vars:
+    # domain: 
+    # server_ip: 
+
+  roles:
+    - { role: web_server_setup, when: ansible_os_family == 'Debian' }
+
+
+
+
+
+
+

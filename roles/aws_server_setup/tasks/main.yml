@@ -1,0 +1,102 @@
+---
+# tasks file for aws_server_setup
+
+    - set_fact:
+        domain_: "{{( domain ) | replace('.', '_')}}"
+
+    - name: Create key pair
+      ec2_key:
+        name: "{{domain_}}"
+        region: "{{region_aws}}"
+        aws_access_key: "{{ aws_access_key_1 }}"
+        aws_secret_key: "{{ aws_secret_key_1 }}"
+      register: key_ec2_inst
+
+    - name: Save private key
+      copy:
+        content: "{{ key_ec2_inst.key.private_key }}"
+        dest: "./{{domain_}}.pem"
+        mode: 0400
+      when: key_ec2_inst.changed
+
+    # Create a security group
+    - include: security_group.yml
+
+    - name: Launch instance
+      ec2:
+        region: "{{ region_aws }}"
+        aws_access_key: "{{ aws_access_key_1 }}"
+        aws_secret_key: "{{ aws_secret_key_1 }}"
+        key_name: "{{ domain_ }}"
+        instance_type: "{{ instance_type_aws }}"
+        image: "{{ image }}"
+        wait: yes
+        group: "{{ domain_ }}_security_group"
+        volumes:
+          - device_name: /dev/sda1
+            volume_type: gp2
+            volume_size: "{{ volume_size_for_instance }}"
+            delete_on_termination: true
+        instance_tags:
+          Name: "{{ domain_ }}"
+        exact_count: 1
+        count_tag:
+          Name: "{{ domain_ }}"
+      register: ec2
+
+    # - name: Print vars ec2
+    #   debug:
+    #     msg:
+    #       - "{{ ec2 }}"
+
+    - name: associate new elastic IPs with each of the instances
+      ec2_eip:
+        region: "{{ region_aws }}"
+        aws_access_key: "{{ aws_access_key_1 }}"
+        aws_secret_key: "{{ aws_secret_key_1 }}"
+        device_id: "{{ ec2.instance_ids[0] }}"
+      when:  ec2.instance_ids
+      register: new_ip
+
+    - name: Get existing ip
+      set_fact:
+        server_ip: "{{item.public_ip}}"
+      when: new_ip.public_ip is not defined
+      loop: "{{ ec2.tagged_instances }}"
+
+    - name: Get new ip
+      set_fact:
+        server_ip: "{{ new_ip.public_ip }}"
+      when: new_ip.public_ip is defined
+
+    # - name: Print vars server_ip
+    #   debug:
+    #     msg:
+    #       - "{{ server_ip }}"
+    #   when: server_ip is defined
+
+    - name: Add instance to host group
+      add_host:
+        name: "{{ server_ip }}"
+        hostname: "{{ server_ip }}"
+        ansible_ssh_user: "{{ user_aws }}"
+        ansible_ssh_private_key_file: "./{{domain_}}.pem"
+        domain: "{{ domain }}"
+        server_ip: "{{ server_ip }}"
+        groupname: aws_new_server
+     # loop: "{{ ec2.tagged_instances }}"
+      register: host_1
+
+    - name: Print vars host_1
+      debug:
+        msg:
+          - "{{ host_1 }}"
+
+
+    - name: Wait for SSH to come up
+      wait_for:
+          host: "{{ server_ip }}"
+          port: 22
+          delay: 10
+          timeout: 60
+      #loop: "{{ ec2.tagged_instances }}"  

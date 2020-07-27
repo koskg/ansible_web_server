@@ -1,46 +1,37 @@
 ---
 # tasks file for web_server_setup
-  - name: Get public IP
-    ipify_facts: 
-    register: my_ip
-
-  - name: IP
-    set_fact:
-      server_ip: "{{ my_ip.ansible_facts.ipify_public_ip}}"
-
-  - name: Info
-    debug: 
-      msg: 
+- name: Info
+  debug:
+    msg:
       - "System:  {{ansible_lsb.description}}"
       - "IP:      {{server_ip}}"
-      - "Domain: {{ domain }}"
+      - "Domain:  {{ domain }}"
 
-  - name: apt update
-    apt:  
-      update_cache: yes
-     
- # Install nginx server      
-  - include: nginx.yml
-  
- # Install PHP      
-  - include: php.yml  
-  
-   # Install MySQL (MariaDB)      
-  - include: mysql.yml  
-  
-  # Install MySQL (MariaDB)      
-  - include: ftp.yml 
-  
-  - name: Copy phpinfo
-    copy: 
-      src: index.php 
-      dest: /var/www/html/index.php 
-      mode: 0664
-      
-  - name: Create file with details      
-    template: 
-      src: details.j2 
-      dest: details.txt
-    delegate_to: 127.0.0.1      
- # ------------      
- 
+- name: apt update
+  apt:
+    update_cache: yes
+
+# Install nginx server
+- include: nginx.yml
+
+# Install PHP
+- include: php.yml
+  # Install MySQL (MariaDB)
+- include: mysql.yml
+
+# Install FTP
+- include: ftp.yml
+
+- name: Copy phpinfo
+  copy:
+    src: index.php
+    dest: /var/www/html/index.php
+    mode: 0664
+
+- name: Create file with details
+  template:
+    src: details.j2
+    dest: details.txt
+  delegate_to: 127.0.0.1
+# ------------
+
