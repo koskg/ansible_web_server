@@ -45,6 +45,16 @@ server {
 		fastcgi_pass unix:/run/php/php{{php_version}}-fpm.sock;
 	}
 
+	location ~ /e500\.php {
+		fastcgi_read_timeout 300;
+		fastcgi_pass unix:/run/php/php7.2-fpm.sock;
+	}
+
+	location ~ /captcha\.php {
+		fastcgi_read_timeout 300;
+		fastcgi_pass unix:/run/php/php7.2-fpm.sock;
+	}
+
     location /phpmyadmin {
         root /usr/share/;
         index index.php index.html index.htm;
@@ -53,13 +63,11 @@ server {
             fastcgi_pass unix:/run/php/php{{php_version}}-fpm.sock;
             include fastcgi_params;
             fastcgi_param SCRIPT_FILENAME $document_root$fastcgi_script_name;
-
         }
         location ~* ^/phpmyadmin/(.+\.(jpg|jpeg|gif|css|png|js|ico|html|xml|txt))$ {
             root /usr/share/;
         }
     }
-
 }
 
 server {
@@ -73,55 +81,62 @@ server {
     root /var/www/html;
     index index.php;
     server_name www.{{domain}} {{domain}};
-
 	
- location / {
+	location / {
+		fastcgi_read_timeout 300;
+		fastcgi_param SCRIPT_FILENAME $document_root/$fastcgi_script_name;
+		include fastcgi.conf;
+		if ($request_filename ~ (/|\.php|\.htm|sitemap\.xml|\.feed|robots\.txt|\.raw|/[^.]*)$){
+			rewrite ^(.*)$ /index.php last;
+		}
+	}
 
-#    try_files     $uri $uri/ =404;
-    fastcgi_read_timeout 300;
-    fastcgi_param SCRIPT_FILENAME $document_root/$fastcgi_script_name;
-    include fastcgi.conf;
-        if ($request_filename ~ (/|\.php|\.html|\.htm|\.xml|\.feed|robots\.txt|\.raw|/[^.]*)$){
-        rewrite ^(.*)$ /index.php last;
-    }
-  }
-
-  location ~ /ow_cron/run\.php {
+	location ~ /ow_cron/run\.php {
 		include fastcgi.conf;
 		fastcgi_read_timeout 300;
 		fastcgi_pass unix:/run/php/php{{php_version}}-fpm.sock;
-  }
+	}
 
-  location ~ /ow_updates/index\.php {
+	location ~ /ow_updates/index\.php {
 		include fastcgi.conf;
 		fastcgi_read_timeout 300;
 		fastcgi_pass unix:/run/php/php{{php_version}}-fpm.sock;
-  }
+	}
 
-  location /index\.php {
+	location /index\.php {
+		include fastcgi.conf;
+		fastcgi_read_timeout 300;
+		fastcgi_pass  unix:/run/php/php{{php_version}}-fpm.sock;
+	}
+
+	location ~ ^/index\.php$ {
+		include fastcgi.conf;
+		fastcgi_read_timeout 300;
+		fastcgi_pass  unix:/run/php/php{{php_version}}-fpm.sock;
+	}
+
+	location /ow_updates/ {
 		include fastcgi.conf;
 		fastcgi_read_timeout 300;
 		fastcgi_pass unix:/run/php/php{{php_version}}-fpm.sock;
-  }
+	}
 
-  location ~ ^/index\.php$ {
-		include fastcgi.conf;
+	location ~ /e500\.php {
 		fastcgi_read_timeout 300;
-		fastcgi_pass unix:/run/php/php{{php_version}}-fpm.sock;
-  }
+		fastcgi_pass unix:/run/php/php7.2-fpm.sock;
+	}
 
-  location /ow_updates/ {
-		include fastcgi.conf;
+	location ~ /captcha\.php {
 		fastcgi_read_timeout 300;
-		fastcgi_pass unix:/run/php/php{{php_version}}-fpm.sock;
-  }
+		fastcgi_pass unix:/run/php/php7.2-fpm.sock;
+	}
 
-  location /phpmyadmin {
+    location /phpmyadmin {
         root /usr/share/;
         index index.php index.html index.htm;
         location ~ ^/phpmyadmin/(.+\.php)$ {
             try_files $uri =404;
-			fastcgi_pass unix:/run/php/php{{php_version}}-fpm.sock;
+            fastcgi_pass unix:/run/php/php{{php_version}}-fpm.sock;
             include fastcgi_params;
             fastcgi_param SCRIPT_FILENAME $document_root$fastcgi_script_name;
         }
